@@ -1,15 +1,24 @@
-import { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSearchAnimeQuery } from "../store/animeApi";
 import { useDebounce } from "../hooks/useDebounce";
 import { AnimeCard } from "../components/AnimeCard";
 import { Pagination } from "../components/Pagination";
 
 export function SearchPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
   const [currentPage, setCurrentPage] = useState(1);
   const debouncedSearch = useDebounce(searchTerm, 250);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (debouncedSearch) {
+      setSearchParams({ q: debouncedSearch });
+    } else {
+      setSearchParams({});
+    }
+  }, [debouncedSearch, setSearchParams]);
 
   const { data, isLoading, isFetching } = useSearchAnimeQuery(
     { query: debouncedSearch, page: currentPage },
@@ -18,9 +27,9 @@ export function SearchPage() {
 
   const handleAnimeClick = useCallback(
     (id: number) => {
-      navigate(`/anime/${id}`);
+      navigate(`/anime/${id}?q=${encodeURIComponent(searchTerm)}`);
     },
-    [navigate]
+    [navigate, searchTerm]
   );
 
   return (
