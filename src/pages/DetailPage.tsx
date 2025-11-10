@@ -1,10 +1,12 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Star, Calendar, Tv, Clock } from "lucide-react";
 import { useGetAnimeByIdQuery } from "../store/animeApi";
 
 export function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const q = searchParams.get("q") ?? "";
   const animeId = id ? Number(id) : 0;
   const { data, isLoading, error } = useGetAnimeByIdQuery(animeId, {
     skip: !id || isNaN(animeId),
@@ -23,7 +25,10 @@ export function DetailPage() {
       <div className="min-h-screen bg-base-200 flex justify-center items-center">
         <div className="text-center">
           <p className="text-2xl mb-4">Anime not found</p>
-          <button className="btn btn-primary" onClick={() => navigate("/")}>
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate(q ? `/?q=${encodeURIComponent(q)}` : "/")}
+          >
             Go Back
           </button>
         </div>
@@ -38,7 +43,7 @@ export function DetailPage() {
       <div className="container mx-auto px-4 py-8">
         <button
           className="btn btn-ghost mb-6 gap-2 hover:btn-primary transition-all duration-300 shadow-md hover:shadow-lg"
-          onClick={() => navigate("/")}
+          onClick={() => navigate(q ? `/?q=${encodeURIComponent(q)}` : "/")}
         >
           <ArrowLeft size={20} />
           Back to Search
@@ -190,7 +195,6 @@ export function DetailPage() {
               </div>
             </div>
 
-            {/* Alternative Titles */}
             {(anime.title_english ||
               anime.title_japanese ||
               (anime.title_synonyms?.length ?? 0) > 0) && (
@@ -232,7 +236,6 @@ export function DetailPage() {
               </div>
             )}
 
-            {/* Combined: Studios, Producers, Licensors, Themes */}
             {anime.studios?.length ||
             anime.producers?.length ||
             anime.licensors?.length ||
@@ -319,7 +322,6 @@ export function DetailPage() {
               </div>
             )}
 
-            {/* Trailer */}
             {anime.trailer?.embed_url && (
               <div className="card bg-base-100 shadow-xl border border-base-300/50">
                 <div className="card-body">

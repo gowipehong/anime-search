@@ -13,6 +13,10 @@ export function SearchPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    setSearchTerm(searchParams.get("q") || "");
+  }, [searchParams]);
+
+  useEffect(() => {
     if (debouncedSearch) {
       setSearchParams({ q: debouncedSearch });
     } else {
